@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: task-cronjob
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: log-saver
+            image: busybox
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                tar -czf /data/log_$(date +'%Y%m%d-%H%M%S').tar.gz /data/app.log
+            volumeMounts:
+            - mountPath: /data
+              name: logs
+          volumes:
+          - name: logs
+            hostPath:
+              path: /var/log/task-app
+              type: DirectoryOrCreate

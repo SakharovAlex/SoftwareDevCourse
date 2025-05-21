@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: task-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: task-daemon
+  template:
+    metadata:
+      labels:
+        app: task-daemon
+    spec:
+      containers:
+      - name: log-copier
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            mkdir /backup
+            while true; do
+              TS=$(date +%Y-%m-%d_%H-%M-%S);
+              cp /data/app.log /backup/;
+              sleep 60;
+            done
+        volumeMounts:
+        - name: logs
+          mountPath: /data
+          readOnly: true
+      volumes:
+      - name: logs
+        hostPath:
+          path: /var/log/task-app
+          type: DirectoryOrCreate

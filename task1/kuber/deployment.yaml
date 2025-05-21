@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: task-app
+  template:
+    metadata:
+      labels:
+        app: task-app
+    spec:
+      containers:
+        - name: app
+          image: alexandr26/task-app
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs/
+          envFrom:
+            - configMapRef:
+                name: task-configmap
+      volumes:
+        - name: logs
+          hostPath:
+            path: /var/log/task-app/
+            type: DirectoryOrCreate
